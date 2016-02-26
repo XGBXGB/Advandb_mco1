@@ -8,7 +8,7 @@ public class QueriesController {
 		querySets = new QuerySet[7];
 		Query[] queries = {
 				new Query("SELECT * FROM hpq_hh LIMIT 1;"), 
-				new Query("SELECT * FROM hpq_hh LIMIT 2;"),
+				new Query("SELECT H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs FROM hpq_mem M, hpq_hh H WHERE jobind=1 AND age<18 and educind=1 AND H.id = M.id;"),
 				new Query("SELECT * FROM hpq_hh LIMIT 3;"),
 				new Query("SELECT * FROM hpq_hh LIMIT 4;"),
 				new Query("SELECT * FROM hpq_hh LIMIT 5;"),

@@ -52,8 +52,14 @@ public class ProjectView extends JFrame implements ActionListener{
         }
         
        
-		table=new JTable();
+		table=new JTable(){
+            public boolean getScrollableTracksViewportWidth()
+            {
+                return getPreferredSize().width < getParent().getWidth();
+            }
+        };
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.setEnabled(false);
 		qc = new QueriesController();
 		tfmsd = new TableFromMySqlDatabase();
 		
@@ -90,7 +96,7 @@ public class ProjectView extends JFrame implements ActionListener{
 		optimizeCBox.setBounds(565,45, 150,25);
 		
 	
-		tableSp = new JScrollPane(table,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		tableSp = new JScrollPane(table,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableSp.setBounds(10,10,545,275);
 		queryPanel = new JPanel();
 		queryPanel.setBounds(0,0,750,500);
@@ -127,8 +133,7 @@ public class ProjectView extends JFrame implements ActionListener{
 			resizeColumnWidth(table);
 			
 			
-			queryPanel.repaint();
-			queryPanel.revalidate();
+			
 		}
 		else if(e.getSource() == queryCBox){
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
