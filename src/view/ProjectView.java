@@ -36,8 +36,47 @@ public class ProjectView extends JFrame implements ActionListener{
 	private TableFromMySqlDatabase tfmsd;
 	private QueriesController qc;
 	private ArrayList<ConditionPanel> conditions;
+	public ArrayList<String> columns1;
+	public ArrayList<String> columns2;
 	
 	public ProjectView(){
+		/*
+		 * H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs 
+		 * */
+		columns1 = new ArrayList();
+		columns1.add("brgy");
+		columns1.add("sex");
+		columns1.add("age_yr");
+		columns1.add("occup");
+		columns1.add("gradel");
+		columns1.add("work_ddhrs"); 
+		columns1.add("sch_type");
+		columns1.add("njob");
+		columns1.add("jstatus");
+		columns1.add("fadd_work_hrs");
+		columns1.add("fxtra_wrk");
+		columns1.add("workcl");
+		columns1.add("pregind");
+		columns1.add("pwd_ind");
+		
+		columns2 = new ArrayList();
+		columns2.add("civstat");
+		columns2.add("ynotsch");
+		columns2.add("literind");
+		columns2.add("regvotind");
+		columns2.add("sss_ind");
+		columns2.add("scid_ind");
+		columns2.add("jobind");
+		columns2.add("njob");
+		columns2.add("jstatus");
+		columns2.add("work_ddhrs");
+		columns2.add("lastlookjob");
+		columns2.add("wtwind");
+		columns2.add("solo_parent");
+		columns2.add("pwd_ind");
+		
+		
+		
 		UIManager.put("nimbusBase", new Color(255, 187, 0));
         UIManager.put("nimbusBlueGrey", new Color(3, 192, 60));
 
@@ -166,12 +205,14 @@ public class ProjectView extends JFrame implements ActionListener{
 				}
 			}
 		}else if(e.getSource() == addCondBtn){
+			if(queryCBox.getSelectedItem().toString().endsWith("(2)"))
+				conditions.add(new ConditionPanel(this, columns2));
+			else
+				conditions.add(new ConditionPanel(this, columns1));
 			
-			conditions.add(new ConditionPanel(this));
 			conditionTable.setModel(new ConditionTableModel(conditions));
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
-			System.out.println(conditions.size());
 		}
 	}
 	
