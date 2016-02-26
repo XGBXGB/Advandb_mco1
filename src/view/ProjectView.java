@@ -40,9 +40,9 @@ public class ProjectView extends JFrame implements ActionListener{
 	public ArrayList<String> columns2;
 	
 	public ProjectView(){
-		/*
-		 * H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs 
-		 * */
+		qc = new QueriesController();
+		tfmsd = new TableFromMySqlDatabase();
+		
 		columns1 = new ArrayList();
 		columns1.add("brgy");
 		columns1.add("sex");
@@ -75,11 +75,8 @@ public class ProjectView extends JFrame implements ActionListener{
 		columns2.add("solo_parent");
 		columns2.add("pwd_ind");
 		
-		
-		
 		UIManager.put("nimbusBase", new Color(255, 187, 0));
         UIManager.put("nimbusBlueGrey", new Color(3, 192, 60));
-
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -90,7 +87,6 @@ public class ProjectView extends JFrame implements ActionListener{
         } catch (Exception e) {
         }
         
-       
 		table=new JTable(){
             public boolean getScrollableTracksViewportWidth()
             {
@@ -99,8 +95,6 @@ public class ProjectView extends JFrame implements ActionListener{
         };
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setEnabled(false);
-		qc = new QueriesController();
-		tfmsd = new TableFromMySqlDatabase();
 		
 		execTimeTArea = new JTextArea();
 		execTimeTArea.setBounds(565,105,150,180);
@@ -112,6 +106,7 @@ public class ProjectView extends JFrame implements ActionListener{
 		
 		queryBtn = new JButton("Query");
 		queryBtn.setBounds(565,75,150,25);
+		queryBtn.addActionListener(this);
 		
 		queryCBox = new JComboBox<String>();
 		queryCBox.addItem("1 Table");
@@ -122,7 +117,6 @@ public class ProjectView extends JFrame implements ActionListener{
 		queryCBox.addItem("3 Tables (2)");
 		queryCBox.addItem("4 Tables");
 		queryCBox.addActionListener(this);
-		
 		queryCBox.setBounds(565, 15, 150, 25);
 		
 		optimizeCBox = new JComboBox<String>();
@@ -131,12 +125,11 @@ public class ProjectView extends JFrame implements ActionListener{
 		optimizeCBox.addItem("Indices");
 		optimizeCBox.addItem("Views");
 		optimizeCBox.addItem("Stored Procedures");
-		
 		optimizeCBox.setBounds(565,45, 150,25);
 		
-	
 		tableSp = new JScrollPane(table,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableSp.setBounds(10,10,545,275);
+		
 		queryPanel = new JPanel();
 		queryPanel.setBounds(0,0,750,500);
 		queryPanel.add(execTimeTArea);
@@ -150,13 +143,11 @@ public class ProjectView extends JFrame implements ActionListener{
 		timePanel = new JPanel();
 		timePanel.setLayout(null);
 		
-		
 		tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Query Tab", queryPanel);
 		tabbedPane.addTab("Time Table", timePanel);
-		queryBtn.addActionListener(this);
-		getContentPane().add(tabbedPane);
 		
+		getContentPane().add(tabbedPane);
 		setVisible(true);
 		setSize(750,500);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -164,6 +155,13 @@ public class ProjectView extends JFrame implements ActionListener{
 	
 	public void actionPerformed(ActionEvent e){
 		if(e.getSource() == queryBtn){
+			if(queryCBox.getSelectedItem().toString().startsWith("2")){
+				if(conditions!=null){
+					//add conditions to query
+				}
+			}
+			
+			
 			int i = queryCBox.getSelectedIndex();
 			int j = optimizeCBox.getSelectedIndex();
 			

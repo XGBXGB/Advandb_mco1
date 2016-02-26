@@ -4,6 +4,10 @@ public class Query {
 	private String query;
 	private double execTime;
 	
+	public Query(){
+		
+	}
+	
 	public Query(String query) {
 		this.query = query;
 	}
