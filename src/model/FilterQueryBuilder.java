@@ -19,7 +19,31 @@ public class FilterQueryBuilder extends Query{
     private String having;
     private String orderBy;
 
-    public FilterQueryBuilder() {
+    public void setSelect(String select) {
+		this.select = select;
+	}
+
+	public void setFrom(String from) {
+		this.from = from;
+	}
+
+	public void setWhere(String where) {
+		this.where = where;
+	}
+
+	public void setGroupBy(String groupBy) {
+		this.groupBy = groupBy;
+	}
+
+	public void setHaving(String having) {
+		this.having = having;
+	}
+
+	public void setOrderBy(String orderBy) {
+		this.orderBy = orderBy;
+	}
+
+	public FilterQueryBuilder() {
         select = "";
         from = "";
         where = "WHERE ";
@@ -81,6 +105,18 @@ public class FilterQueryBuilder extends Query{
     		query +=orderBy;
     	return query;
     };
+    
+    public FilterQueryBuilder getCopy(){
+    	FilterQueryBuilder o = new FilterQueryBuilder();
+    	o.setSelect(select);
+    	o.setFrom(from);
+    	o.setWhere(where);
+    	o.setGroupBy(groupBy);
+    	o.setHaving(having);
+    	o.setOrderBy(orderBy);
+    	
+    	return o;
+    }
     
     /*
     public static void main (String[] args){

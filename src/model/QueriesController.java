@@ -56,5 +56,9 @@ public class QueriesController {
 	public String getQuery(int i, int j) {
 		return querySets[i].getQuerries()[j].getQuery();
 	}
+	
+	public Query getQueryObject(int i, int j) {
+		return querySets[i].getQuerries()[j];
+	}
 
 }

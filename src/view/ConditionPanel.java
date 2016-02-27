@@ -74,6 +74,12 @@ public class ConditionPanel extends JPanel implements ActionListener{
 		return condition.getText();
 	}
 	
+	public String getQueryCondition(){
+		return column.getSelectedItem().toString() +" " 
+				+ operator.getSelectedItem().toString() +" "
+				+ condition.getText();
+	}
+	
 	public void actionPerformed(ActionEvent e){
 		if(e.getSource()==close){
 			parent.removePanel(this);

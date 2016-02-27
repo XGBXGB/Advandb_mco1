@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import model.FilterQueryBuilder;
 import model.QueriesController;
 
 public class ProjectView extends JFrame implements ActionListener{
@@ -155,22 +156,22 @@ public class ProjectView extends JFrame implements ActionListener{
 	
 	public void actionPerformed(ActionEvent e){
 		if(e.getSource() == queryBtn){
-			if(queryCBox.getSelectedItem().toString().startsWith("2")){
-				if(conditions!=null){
-					//add conditions to query
-				}
-			}
-			
-			
 			int i = queryCBox.getSelectedIndex();
 			int j = optimizeCBox.getSelectedIndex();
-			
-			
-			table.setModel(tfmsd.getResultTable(qc.getQuery(i, j)));
-			resizeColumnWidth(table);
-			
-			
-			
+			if(queryCBox.getSelectedItem().toString().startsWith("2")){
+				if(conditions!=null){
+					FilterQueryBuilder query = ((FilterQueryBuilder)qc.getQueryObject(i, j)).getCopy();
+					for(int x=0; x<conditions.size(); x++){
+						query.addCondition(conditions.get(x).getQueryCondition());
+					}
+					System.out.println(query.getQuery());
+					table.setModel(tfmsd.getResultTable(query.getQuery()));
+					resizeColumnWidth(table);
+				}
+			} else{
+				table.setModel(tfmsd.getResultTable(qc.getQuery(i, j)));
+				resizeColumnWidth(table);
+			}
 		}
 		else if(e.getSource() == queryCBox){
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
