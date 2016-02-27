@@ -48,7 +48,7 @@ public class TableFromMySqlDatabase extends JFrame {
 		// class which inherits from the AbstractTableModel class
 		Vector<String> columnNamesVector = new Vector<String>();
 		Vector<Vector<String>> dataVector = new Vector<Vector<String>>();
-		System.out.println(data.size());
+
 		for (int i = 0; i < data.size(); i++)
 
 		{

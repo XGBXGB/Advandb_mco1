@@ -3,14 +3,17 @@ package view;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import javax.swing.JTabbedPane;
@@ -23,13 +26,16 @@ import javax.swing.table.TableColumnModel;
 
 import model.FilterQueryBuilder;
 import model.QueriesController;
+import model.Query;
+import model.QuerySet;
 
 public class ProjectView extends JFrame implements ActionListener{
 	private DefaultTableModel model;
+	private JLabel desc;
 	private JComboBox<String> queryCBox, optimizeCBox;
-	private JButton queryBtn, addCondBtn;
-	private JTable table, conditionTable;
-	private JScrollPane tableSp, conditionSp;
+	private JButton queryBtn, addCondBtn, timeBtn;
+	private JTable table, conditionTable, timeTable;
+	private JScrollPane tableSp, conditionSp, timeTableSp;
 	private JTextArea execTimeTArea;
 	private JTabbedPane tabbedPane;
 	private JPanel queryPanel;
@@ -39,10 +45,38 @@ public class ProjectView extends JFrame implements ActionListener{
 	private ArrayList<ConditionPanel> conditions;
 	public ArrayList<String> columns1;
 	public ArrayList<String> columns2;
+	private String[][] values;
 	
 	public ProjectView(){
 		qc = new QueriesController();
 		tfmsd = new TableFromMySqlDatabase();
+		
+		desc = new JLabel("<html>List of the number of household members studying and how many of those are actively participating (for the past 12 months) in the food for school program per household that has a member that is not an ofw and works as a fisherman (mangingisda) that is not under the cash for work program who uses a fishing equipment that he/she does not own.</html>");
+		desc.setBounds(10, 0, 710, 70);
+		
+		String columnNames[] = { "", "No Optimization", "Heuristic Optimization", "Indices", "Views", "Stored Procedures" };
+		String[][] values = new String[7][6];
+		values[0][0] = "1 Table";
+		values[1][0] = "1 Table (1)";
+		values[2][0] = "2 Table";
+		values[3][0] = "2 Table (1)";
+		values[4][0] = "3 Table";
+		values[5][0] = "3 Table (1)";
+		values[6][0] = "4 Table";
+		timeTable = new JTable(values, columnNames){
+            public boolean getScrollableTracksViewportWidth()
+            {
+                return getPreferredSize().width < getParent().getWidth();
+            }
+        };
+		
+		timeTableSp = new JScrollPane(timeTable);
+		timeTableSp.setBounds(10,10,545,275);
+		
+		timeBtn = new JButton("Refresh Table");
+		
+		timeBtn.addActionListener(this);
+		timeBtn.setBounds(600, 10, 100, 20);
 		
 		columns1 = new ArrayList();
 		columns1.add("brgy");
@@ -97,16 +131,19 @@ public class ProjectView extends JFrame implements ActionListener{
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setEnabled(false);
 		
+		
+		Font f = new Font(Font.SANS_SERIF, Font.PLAIN, 9);
 		execTimeTArea = new JTextArea();
-		execTimeTArea.setBounds(565,105,150,180);
+		execTimeTArea.setFont(f);
+		execTimeTArea.setBounds(565,165,150,180);
 		
 		addCondBtn = new JButton("Add Condition");
-	    addCondBtn.setBounds(400,295,150,30);
+	    addCondBtn.setBounds(400,375,150,30);
 	    addCondBtn.addActionListener(this);
 	    addCondBtn.setVisible(false);
 		
 		queryBtn = new JButton("Query");
-		queryBtn.setBounds(565,75,150,25);
+		queryBtn.setBounds(565,135,150,25);
 		queryBtn.addActionListener(this);
 		
 		queryCBox = new JComboBox<String>();
@@ -118,7 +155,7 @@ public class ProjectView extends JFrame implements ActionListener{
 		queryCBox.addItem("3 Tables (2)");
 		queryCBox.addItem("4 Tables");
 		queryCBox.addActionListener(this);
-		queryCBox.setBounds(565, 15, 150, 25);
+		queryCBox.setBounds(565, 75, 150, 25);
 		
 		optimizeCBox = new JComboBox<String>();
 		optimizeCBox.addItem("No optimization");
@@ -126,10 +163,10 @@ public class ProjectView extends JFrame implements ActionListener{
 		optimizeCBox.addItem("Indices");
 		optimizeCBox.addItem("Views");
 		optimizeCBox.addItem("Stored Procedures");
-		optimizeCBox.setBounds(565,45, 150,25);
+		optimizeCBox.setBounds(565,105, 150,25);
 		
 		tableSp = new JScrollPane(table,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		tableSp.setBounds(10,10,545,275);
+		tableSp.setBounds(10,70,545,275);
 		
 		queryPanel = new JPanel();
 		queryPanel.setBounds(0,0,750,500);
@@ -139,9 +176,13 @@ public class ProjectView extends JFrame implements ActionListener{
 		queryPanel.add(optimizeCBox);
 		queryPanel.add(tableSp);
 		queryPanel.add(addCondBtn);
+		queryPanel.add(desc);
 		queryPanel.setLayout(null);
 		
 		timePanel = new JPanel();
+		timePanel.setBounds(0, 0, 750, 500);
+		timePanel.add(timeTableSp);
+		timePanel.add(timeBtn);
 		timePanel.setLayout(null);
 		
 		tabbedPane = new JTabbedPane();
@@ -150,17 +191,20 @@ public class ProjectView extends JFrame implements ActionListener{
 		
 		getContentPane().add(tabbedPane);
 		setVisible(true);
-		setSize(750,500);
+		setSize(750,560);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
 	
 	public void actionPerformed(ActionEvent e){
 		if(e.getSource() == queryBtn){
+			
 			int i = queryCBox.getSelectedIndex();
 			int j = optimizeCBox.getSelectedIndex();
+			desc.setText("<html>" + qc.getQuerySets()[i].getDescription() + "</html>");
+			Query q = qc.getQueryObject(i, j);
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
 				if(conditions!=null){
-					FilterQueryBuilder query = ((FilterQueryBuilder)qc.getQueryObject(i, j)).getCopy();
+					FilterQueryBuilder query = ((FilterQueryBuilder)q).getCopy();
 					for(int x=0; x<conditions.size(); x++){
 						query.addCondition(conditions.get(x).getQueryCondition());
 					}
@@ -169,9 +213,23 @@ public class ProjectView extends JFrame implements ActionListener{
 					resizeColumnWidth(table);
 				}
 			} else{
-				table.setModel(tfmsd.getResultTable(qc.getQuery(i, j)));
+				table.setModel(tfmsd.getResultTable(q.getQuery()));
 				resizeColumnWidth(table);
 			}
+			qc.query10Times(i, j);	
+			String s = "";
+			for (int k = 0; k < 10; k++) {
+				switch(k) {
+				case 0: s += "1st "; break;
+				case 1: s += "2nd "; break;
+				case 2: s += "3rd "; break;
+				default: s += (k+1) + "th "; break;
+				}
+				s += q.getTimeAt(k) + "\n";
+			}
+			s+= "Ave: " + q.getExecTimeAverage();
+			execTimeTArea.setText(s);
+			
 		}
 		else if(e.getSource() == queryCBox){
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
@@ -183,7 +241,7 @@ public class ProjectView extends JFrame implements ActionListener{
 					conditionTable.setDefaultRenderer(ConditionPanel.class, new ConditionCellRenderer());
 					conditionTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 					conditionSp = new JScrollPane(conditionTable,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-					conditionSp.setBounds(10,295,376,125);
+					conditionSp.setBounds(10,355,376,125);
 					conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 					conditionTable.setRowHeight(80);
 					queryPanel.add(conditionSp);
@@ -212,6 +270,16 @@ public class ProjectView extends JFrame implements ActionListener{
 			conditionTable.setModel(new ConditionTableModel(conditions));
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
+		} else if(e.getSource() == timeBtn) {
+			qc.setTimes();
+			DecimalFormat df = new DecimalFormat("#.000000");
+			QuerySet[] qss = qc.getQuerySets();
+			for (int i = 0; i < qss.length; i++) {
+				Query[] qs = qss[i].getQuerries();
+				for (int j = 0; j < qs.length; j++) {
+					timeTable.setValueAt(String.valueOf(df.format(qs[j].getExecTimeAverage())), i, j+1);
+				}
+			}
 		}
 	}
 	
