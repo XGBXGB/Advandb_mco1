@@ -86,10 +86,9 @@ public class QueriesController {
 
 		//TABLE2 W/ COND (1) HEURISTIC OPTIMIZATION//
 		twoTablesOptimiz2 = new FilterQueryBuilder();
-		twoTablesOptimiz2.addColumn("H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs");
-		twoTablesOptimiz2.addTable("(SELECT id, memno, sex, age_yr, occup, work_ddhrs FROM hpq_mem "
-				+ "WHERE jobind=1 AND age_yr<18 and educind=1) M JOIN (SELECT id, brgy FROM hpq_hh) H "
-				+ "ON H.id = M.id");
+		twoTablesOptimiz2.addColumn("id, memno, sex, age_yr, occup, work_ddhrs");
+		twoTablesOptimiz2.addTable("hpq_mem");
+		twoTablesOptimiz2.addCondition("jobind=1 AND age_yr<18 and educind=1");
 		twoTablesOptimiz2.setOptimization("Heuristic Optimization");
 		//TABLE2 W/ COND (1) HEURISTIC OPTIMIZATION//
 		
@@ -144,7 +143,7 @@ public class QueriesController {
 				twoTablesOptimiz4, new Query("SELECT * FROM hpq_hh LIMIT 5;", "") };
 
 		
-		//TABLE2 W/ COND (1) NO OPTIMIZATION//
+		//TABLE2 W/ COND (2) NO OPTIMIZATION//
 		twoTables2Optimiz1 = new FilterQueryBuilder();
 		twoTables2Optimiz1.addColumn("brgy, COUNT(*)");
 		twoTables2Optimiz1.addTable("hpq_mem M, hpq_hh H");
@@ -152,18 +151,18 @@ public class QueriesController {
 				+ "AND M.id=H.id");
 		twoTables2Optimiz1.addGrouping("brgy");
 		twoTables2Optimiz1.setOptimization("No Optimization");
-		//TABLE2 W/ COND (1) NO OPTIMIZATION//
+		//TABLE2 W/ COND (2) NO OPTIMIZATION//
 
-		//TABLE2 W/ COND (1) HEURISTIC OPTIMIZATION//
+		//TABLE2 W/ COND (2) HEURISTIC OPTIMIZATION//
 		twoTables2Optimiz2 = new FilterQueryBuilder();
-		twoTables2Optimiz2.addColumn("brgy, COUNT(*)");
-		twoTables2Optimiz2.addTable("(SELECT id, memno FROM hpq_mem WHERE educal NOT IN(210,300,400) "
-				+ "AND age_yr>20 AND educind=2 AND sex=1) M JOIN (SELECT id,brgy FROM hpq_hh) H ON H.id=M.id");
+		twoTables2Optimiz2.addColumn("id, memno");
+		twoTables2Optimiz2.addTable("hpq_mem");
+		twoTables2Optimiz2.addCondition("educal NOT IN(210,300,400) AND age_yr>20 AND educind=2 AND sex=1");
 		twoTables2Optimiz2.addGrouping("brgy");
 		twoTables2Optimiz2.setOptimization("Heuristic Optimization");
-		//TABLE2 W/ COND (1) HEURISTIC OPTIMIZATION//
+		//TABLE2 W/ COND (2) HEURISTIC OPTIMIZATION//
 		
-		//TABLE2 W/ COND (1) INDEXES OPTIMIZATION//
+		//TABLE2 W/ COND (2) INDEXES OPTIMIZATION//
 		createIndexes = new ArrayList<String>();
 		createIndexes.add("CREATE INDEX hh_brgy_idx ON hpq_hh(brgy);");
 		createIndexes.add("CREATE INDEX hh_id_idx ON hpq_hh(id);");
@@ -190,10 +189,10 @@ public class QueriesController {
 		twoTables2Optimiz3.addGrouping("brgy");
 		twoTables2Optimiz3.setCreateIndexes(createIndexes);
 		twoTables2Optimiz3.setDropIndexes(dropIndexes);
-		//TABLE2 W/ COND (1) INDEXES OPTIMIZATION//
+		//TABLE2 W/ COND (2) INDEXES OPTIMIZATION//
 		
 		
-		//TABLE2 W/ COND (1) VIEWS OPTIMIZATION//
+		//TABLE2 W/ COND (2) VIEWS OPTIMIZATION//
 		createViews = new ArrayList<String>();
 		createViews.add("CREATE OR REPLACE VIEW filteredMem_v AS SELECT id, memno FROM hpq_mem "
 				+ "WHERE educal NOT IN(210,300,400) AND age_yr>20 AND educind=2 AND sex=1;");
@@ -206,7 +205,7 @@ public class QueriesController {
 		twoTables2Optimiz4.addGrouping("brgy");
 		twoTables2Optimiz4.setOptimization("Views");
 		twoTables2Optimiz4.setCreateViews(createViews);
-		//TABLE2 W/ COND (1) VIEWS OPTIMIZATION//
+		//TABLE2 W/ COND (2) VIEWS OPTIMIZATION//
 		
 		Query[] twoTablesSet2 = { twoTables2Optimiz1, twoTables2Optimiz2, twoTables2Optimiz3,
 				twoTables2Optimiz4, new Query("SELECT * FROM hpq_hh LIMIT 5;", "") };

@@ -116,6 +116,9 @@ public class FilterQueryBuilder extends Query{
     	o.setHaving(having);
     	o.setOrderBy(orderBy);
     	o.setOptimization(optimization);
+    	o.setCreateIndexes(createIndexes);
+    	o.setDropIndexes(dropIndexes);
+    	o.setCreateViews(createViews);
     	
     	return o;
     }

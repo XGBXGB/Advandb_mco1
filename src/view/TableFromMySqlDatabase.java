@@ -24,6 +24,7 @@ public class TableFromMySqlDatabase extends JFrame {
 			if(query.getOptimization().equals("No Optimization") || query.getOptimization().equals("Heuristic Optimization")) {
 				rs = stmt.executeQuery(query.getQuery());
 			} else if(query.getOptimization().equals("Indexes")) {
+				
 				for (int l = 0; l < query.getCreateIndexes().size(); l++) {
 					anotherStmt.execute(query.getCreateIndexes().get(l));
 				}

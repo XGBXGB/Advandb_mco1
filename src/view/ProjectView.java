@@ -79,9 +79,7 @@ public class ProjectView extends JFrame implements ActionListener{
 		timeBtn.setBounds(600, 10, 100, 20);
 		
 		columns1 = new ArrayList();
-		columns1.add("brgy");
 		columns1.add("sex");
-		columns1.add("age_yr");
 		columns1.add("occup");
 		columns1.add("gradel");
 		columns1.add("work_ddhrs"); 
@@ -202,20 +200,38 @@ public class ProjectView extends JFrame implements ActionListener{
 			int j = optimizeCBox.getSelectedIndex();
 			Query q = qc.getQueryObject(i, j);
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
-				if(conditions!=null){
-					FilterQueryBuilder query = ((FilterQueryBuilder)q).getCopy();
-					for(int x=0; x<conditions.size(); x++){
-						query.addCondition(conditions.get(x).getQueryCondition());
+				FilterQueryBuilder query = ((FilterQueryBuilder)q).getCopy();
+				for(int x=0; x<conditions.size(); x++){
+					query.addCondition(conditions.get(x).getQueryCondition());
+				}
+				if(optimizeCBox.getSelectedItem().toString().equalsIgnoreCase("Heuristic Optimization")){
+					String queryH = "";
+					if(queryCBox.getSelectedItem().toString().endsWith(")")){
+						queryH = "SELECT brgy, COUNT(*) FROM ("
+								+ query.getQuery()
+								+ ") M JOIN (SELECT id,brgy FROM hpq_hh) H ON H.id=M.id GROUP BY brgy;";
+						
+					}else{
+						queryH = "SELECT H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs "
+								+ "FROM ("
+								+ query.getQuery()
+								+ ") M JOIN (SELECT id, brgy FROM hpq_hh) H ON H.id = M.id;";
 					}
+					Query heurQuery = new Query(queryH, "Heuristic Optimization");
+					table.setModel(tfmsd.getResultTable(heurQuery));
+					resizeColumnWidth(table);
+					q=heurQuery;
+				}
+				else{
 					table.setModel(tfmsd.getResultTable(query));
 					resizeColumnWidth(table);
-					System.out.println(query.getQuery());
 					q=query;
 				}
 			} else{
 				table.setModel(tfmsd.getResultTable(q));
 				resizeColumnWidth(table);
 			}
+			System.out.println(q.getQuery());
 			qc.query10Times(i, j, q);	
 			q = qc.getQueryObject(i, j);
 			String s = "";

@@ -6,9 +6,9 @@ public class Query {
 	private String query;
 	private double[] execTimes;
 	protected String optimization;
-	private ArrayList<String> createViews;
-	private ArrayList<String> createIndexes;
-	private ArrayList<String> dropIndexes;
+	protected ArrayList<String> createViews;
+	protected ArrayList<String> createIndexes;
+	protected ArrayList<String> dropIndexes;
 	
 	public void setCreateViews(ArrayList<String> createViews) {
 		this.createViews = createViews;
