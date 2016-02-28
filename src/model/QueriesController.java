@@ -249,89 +249,33 @@ public class QueriesController {
 			Connection connection = DBConnect.getConnection();
 			Statement stmt = connection.createStatement();
 			double[] execTimes = new double[10];
+			if (q.getOptimization().equals("Indexes")) {
+				for (int l = 0; l < q.getCreateIndexes().size(); l++) {
+					stmt.execute(q.getCreateIndexes().get(l));
+				}
+
+			} else if (q.getOptimization().equals("Views")) {
+				for (int l = 0; l < q.getCreateViews().size(); l++) {
+					stmt.execute(q.getCreateViews().get(l));
+				}
+			}
 			for (int k = 0; k < execTimes.length; k++) {
 				long startTime = 0;
 				long endTime = 0;
-				if(q.getOptimization().equals("No Optimization") || q.getOptimization().equals("Heuristic Optimization")) {
-					startTime = System.currentTimeMillis();
-					stmt.executeQuery(q.getQuery());
-					endTime = System.currentTimeMillis();
-				} else if(q.getOptimization().equals("Indexes")) {
-					
-					for (int l = 0; l < q.getCreateIndexes().size(); l++) {
-						stmt.execute(q.getCreateIndexes().get(l));
-					}
-					startTime = System.currentTimeMillis();
-					stmt.executeQuery(q.getQuery());
-					endTime = System.currentTimeMillis();
-					for (int l = 0; l < q.getDropIndexes().size(); l++) {
-						stmt.execute(q.getDropIndexes().get(l));
-					}
-					
-				} else if(q.getOptimization().equals("Views")) {
-					for (int l = 0; l < q.getCreateViews().size(); l++) {
-						stmt.execute(q.getCreateViews().get(l));
-					}
-					startTime = System.currentTimeMillis();
-					stmt.executeQuery(q.getQuery());
-					endTime = System.currentTimeMillis();
-					
-				}
+				startTime = System.currentTimeMillis();
+				stmt.executeQuery(q.getQuery());
+				endTime = System.currentTimeMillis();
 				execTimes[k] = (endTime - startTime) / 1000.0;
+			}
+			if (q.getOptimization().equals("Indexes")) {
+				for (int l = 0; l < q.getDropIndexes().size(); l++) {
+					stmt.execute(q.getDropIndexes().get(l));
+				}
 			}
 			querySets[i].getQuerries()[j].setExecTimes(execTimes);
 		} catch (Exception e) {
 
 		}
-	}
-
-	public void setTimes() {
-		try {
-			Connection connection = DBConnect.getConnection();
-			Statement stmt = connection.createStatement();
-			for (int i = 0; i < querySets.length; i++) {
-				Query[] qs = querySets[i].getQuerries();
-				for (int j = 0; j < qs.length; j++) {
-					Query q = querySets[i].getQuerries()[j];
-					double[] execTimes = new double[10];
-					System.out.println(qs[j].getQuery());
-					for (int k = 0; k < execTimes.length; k++) {
-
-						long startTime = 0;
-						long endTime = 0;
-						if(q.getOptimization().equals("No Optimization") || q.getOptimization().equals("Heuristic Optimization")) {
-							startTime = System.currentTimeMillis();
-							stmt.executeQuery(q.getQuery());
-							endTime = System.currentTimeMillis();
-						} else if(q.getOptimization().equals("Indexes")) {
-							for (int l = 0; l < q.getCreateIndexes().size(); l++) {
-								stmt.execute(q.getCreateIndexes().get(l));
-							}
-							startTime = System.currentTimeMillis();
-							stmt.executeQuery(q.getQuery());
-							endTime = System.currentTimeMillis();
-							for (int l = 0; l < q.getDropIndexes().size(); l++) {
-								stmt.execute(q.getDropIndexes().get(l));
-							}
-						} else if(q.getOptimization().equals("Views")) {
-							for (int l = 0; l < q.getCreateViews().size(); l++) {
-								stmt.executeUpdate(q.getCreateViews().get(l));
-							}
-							startTime = System.currentTimeMillis();
-							stmt.executeQuery(q.getQuery());
-							endTime = System.currentTimeMillis();
-							
-						}
-						execTimes[k] = (endTime - startTime) / 1000.0;
-						System.out.println(execTimes[k]);
-					}
-					querySets[i].getQuerries()[j].setExecTimes(execTimes);
-				}
-			}
-		} catch (Exception e) {
-
-		}
-
 	}
 
 }
