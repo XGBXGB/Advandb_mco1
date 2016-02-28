@@ -5,11 +5,15 @@ import java.util.ArrayList;
 public class Query {
 	private String query;
 	private double[] execTimes;
-	private String optimization;
+	protected String optimization;
 	private ArrayList<String> createViews;
 	private ArrayList<String> createIndexes;
 	private ArrayList<String> dropIndexes;
 	
+	public void setOptimization(String optimization) {
+		this.optimization = optimization;
+	}
+
 	public Query(){
 		execTimes = new double[10];
 	}

@@ -11,18 +11,24 @@ public class QueriesController {
 	public QueriesController() {
 		querySets = new QuerySet[7];
 
+		//table2 w/ cond no optimization
 		FilterQueryBuilder twoTablesOptimiz1, twoTablesOptimiz2, twoTablesOptimiz3, twoTablesOptimiz4;
 		twoTablesOptimiz1 = new FilterQueryBuilder();
 		twoTablesOptimiz1.addColumn("H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs");
 		twoTablesOptimiz1.addTable("hpq_mem M, hpq_hh H");
 		twoTablesOptimiz1.addCondition("jobind=1 AND age_yr<18 and educind=1 AND H.id = M.id");
+		twoTablesOptimiz1.setOptimization("No Optimization");
+		//
 
+		//table2 w/ cond heuristic optimization
 		twoTablesOptimiz2 = new FilterQueryBuilder();
 		twoTablesOptimiz2.addColumn("H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs");
 		twoTablesOptimiz2.addTable("(SELECT id, memno, sex, age_yr, occup, work_ddhrs FROM hpq_mem "
 				+ "WHERE jobind=1 AND age_yr<18 and educind=1) M JOIN (SELECT id, brgy FROM hpq_hh) H "
 				+ "ON H.id = M.id");
-
+		twoTablesOptimiz2.setOptimization("Heuristic Optimization");
+		//
+		
 		twoTablesOptimiz4 = new FilterQueryBuilder();
 		twoTablesOptimiz4.addColumn("H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs");
 		twoTablesOptimiz4.addTable("filteredMem_v M, brgyIdHH_v H");
@@ -95,11 +101,10 @@ public class QueriesController {
 		return querySets;
 	}
 
-	public void query10Times(int i, int j) {
+	public void query10Times(int i, int j, Query q) {
 		try {
 			Connection connection = DBConnect.getConnection();
 			Statement stmt = connection.createStatement();
-			Query q = querySets[i].getQuerries()[j];
 			double[] execTimes = new double[10];
 			for (int k = 0; k < execTimes.length; k++) {
 				long startTime = 0;

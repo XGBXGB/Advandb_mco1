@@ -115,6 +115,7 @@ public class FilterQueryBuilder extends Query{
     	o.setGroupBy(groupBy);
     	o.setHaving(having);
     	o.setOrderBy(orderBy);
+    	o.setOptimization(optimization);
     	
     	return o;
     }
