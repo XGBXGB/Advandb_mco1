@@ -73,7 +73,7 @@ public class QueriesController {
 		return querySets;
 	}
 
-	public void query10Times(int i, int j) {
+	public void query10Times(int i, int j, String queryString) {
 		try {
 			Connection connection = DBConnect.getConnection();
 			Statement stmt = connection.createStatement();
@@ -81,7 +81,7 @@ public class QueriesController {
 			for (int k = 0; k < execTimes.length; k++) {
 
 				long startTime = System.currentTimeMillis();
-				stmt.execute(querySets[i].getQuerries()[j].getQuery());
+				stmt.execute(queryString);
 				long endTime = System.currentTimeMillis();
 				execTimes[k] = (endTime - startTime) / 1000.0;
 				System.out.println(execTimes[k]);

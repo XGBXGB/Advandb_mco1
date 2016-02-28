@@ -18,6 +18,7 @@ public class FilterQueryBuilder extends Query{
     private String groupBy;
     private String having;
     private String orderBy;
+    
 
     public void setSelect(String select) {
 		this.select = select;

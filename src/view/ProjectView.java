@@ -202,6 +202,7 @@ public class ProjectView extends JFrame implements ActionListener{
 			int j = optimizeCBox.getSelectedIndex();
 			desc.setText("<html>" + qc.getQuerySets()[i].getDescription() + "</html>");
 			Query q = qc.getQueryObject(i, j);
+			String queryString = "";
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
 				if(conditions!=null){
 					FilterQueryBuilder query = ((FilterQueryBuilder)q).getCopy();
@@ -211,12 +212,14 @@ public class ProjectView extends JFrame implements ActionListener{
 					System.out.println(query.getQuery());
 					table.setModel(tfmsd.getResultTable(query.getQuery()));
 					resizeColumnWidth(table);
+					queryString = query.getQuery();
 				}
 			} else{
 				table.setModel(tfmsd.getResultTable(q.getQuery()));
 				resizeColumnWidth(table);
+				queryString = q.getQuery();
 			}
-			qc.query10Times(i, j);	
+			qc.query10Times(i, j, queryString);	
 			String s = "";
 			for (int k = 0; k < 10; k++) {
 				switch(k) {
