@@ -10,6 +10,18 @@ public class Query {
 	private ArrayList<String> createIndexes;
 	private ArrayList<String> dropIndexes;
 	
+	public void setCreateViews(ArrayList<String> createViews) {
+		this.createViews = createViews;
+	}
+
+	public void setCreateIndexes(ArrayList<String> createIndexes) {
+		this.createIndexes = createIndexes;
+	}
+
+	public void setDropIndexes(ArrayList<String> dropIndexes) {
+		this.dropIndexes = dropIndexes;
+	}
+
 	public void setOptimization(String optimization) {
 		this.optimization = optimization;
 	}
