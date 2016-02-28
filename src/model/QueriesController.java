@@ -11,6 +11,67 @@ public class QueriesController {
 	public QueriesController() {
 		ArrayList<String> createIndexes, dropIndexes, createViews;
 		querySets = new QuerySet[7];
+		createIndexes = new ArrayList<String>();
+		createIndexes.add("CREATE INDEX member_ofw_idx ON hpq_mem (ofw);");
+		createIndexes.add("CREATE INDEX member_solo_parent_idx ON hpq_mem (solo_parent);");
+		
+		dropIndexes = new ArrayList<String>();
+		dropIndexes.add("DROP INDEX member_ofw_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_solo_parent_idx ON hpq_mem;");
+		
+		createViews = new ArrayList<String>();
+		createViews.add("CREATE OR REPLACE VIEW ofwView AS SELECT * FROM hpq_mem WHERE ofw = 1 AND solo_parent = 1");
+		
+		Query[] queries = {
+				new Query(
+						"SELECT * FROM hpq_mem WHERE ofw = 1 and solo_parent = 1;",
+						"No Optimization"),
+				new Query(
+						"SELECT * FROM (SELECT * FROM hpq_mem WHERE ofw = 1 AND solo_parent = 1) t;", 
+						"Heuristic Optimization"),
+				new Query(
+						"SELECT * FROM hpq_mem WHERE ofw = 1 and solo_parent = 1; ", 
+						"Indexes",
+						createIndexes, dropIndexes),
+				new Query(
+						"SELECT * FROM ofwView;",
+						"Views",
+						createViews),
+				new Query(
+						"SELECT * FROM hpq_hh LIMIT 5;",
+						"Stored Procedures"), };
+		
+		createIndexes = new ArrayList<String>();
+		createIndexes.add("CREATE INDEX member_psced7_idx ON hpq_mem (psced7);");
+		createIndexes.add("CREATE INDEX member_educal_idx ON hpq_mem (educal);");
+		createIndexes.add("CREATE INDEX member_jobind_idx ON hpq_mem (jobind);");
+		
+		dropIndexes = new ArrayList<String>();
+		dropIndexes.add("DROP INDEX member_psced7_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_educal_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_jobind_idx ON hpq_mem;");
+		
+		createViews = new ArrayList<String>();
+		createViews.add("CREATE OR REPLACE VIEW coursesView AS SELECT psced7 FROM hpq_mem  WHERE educal in (300, 400) AND jobind = 2;");
+		
+		Query[] queries2 = {
+				new Query(
+						"SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7",
+						"No Optimization"),
+				new Query(
+						"SELECT psced7, count(*) FROM (SELECT psced7 FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2) t GROUP BY psced7", 
+						"Heuristic Optimization"),
+				new Query(
+						"SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7; ", 
+						"Indexes",
+						createIndexes, dropIndexes),
+				new Query(
+						"SELECT psced7, count(psced7)FROM coursesView GROUP BY psced7;",
+						"Views",
+						createViews),
+				new Query(
+						"SELECT * FROM hpq_hh LIMIT 5;",
+						"Stored Procedures"), };
 
 		FilterQueryBuilder twoTablesOptimiz1, twoTablesOptimiz2, twoTablesOptimiz3, twoTablesOptimiz4;
 		FilterQueryBuilder twoTables2Optimiz1, twoTables2Optimiz2, twoTables2Optimiz3, twoTables2Optimiz4;
@@ -150,44 +211,9 @@ public class QueriesController {
 		Query[] twoTablesSet2 = { twoTables2Optimiz1, twoTables2Optimiz2, twoTables2Optimiz3,
 				twoTables2Optimiz4, new Query("SELECT * FROM hpq_hh LIMIT 5;", "") };
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		createIndexes = new ArrayList<String>();
-		createIndexes.add("CREATE INDEX member_psced7_idx ON hpq_mem (psced7);");
-		createIndexes.add("CREATE INDEX member_educal_idx ON hpq_mem (educal);");
-		createIndexes.add("CREATE INDEX member_jobind_idx ON hpq_mem (jobind);");
-		
-		
-		
-		createViews = new ArrayList<String>();
-		createViews.add("CREATE OR REPLACE VIEW coursesView AS SELECT psced7 FROM hpq_mem  WHERE educal in (300, 400) AND jobind = 2;");
-		
-		Query[] queries = {
-				new Query(
-						"SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7",
-						"No Optimization"),
-				new Query(
-						"SELECT psced7, count(*) FROM (SELECT psced7 FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2) t GROUP BY psced7", 
-						"Heuristic Optimization"),
-				new Query(
-						"SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7; ", 
-						"Indexes",
-						createIndexes, dropIndexes),
-				new Query(
-						"SELECT psced7, count(psced7)FROM coursesView GROUP BY psced7;",
-						"Views",
-						createViews),
-				new Query(
-						"SELECT * FROM hpq_hh LIMIT 5;",
-						"Stored Procedures"), };
+	
 		querySets[0] = new QuerySet(queries, "description", "1 Table");
-		querySets[1] = new QuerySet(queries,
+		querySets[1] = new QuerySet(queries2,
 				"Count of members who have college/masters/doctral degree but are unemployed per course.",
 				"1 Table (2)");
 		querySets[2] = new QuerySet(twoTablesSet1,

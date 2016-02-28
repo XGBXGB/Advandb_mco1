@@ -19,20 +19,21 @@ public class TableFromMySqlDatabase extends JFrame {
 		try{
 			Connection connection = DBConnect.getConnection();
 			Statement stmt = connection.createStatement();
+			Statement anotherStmt = connection.createStatement();
 			ResultSet rs = null;
 			if(query.getOptimization().equals("No Optimization") || query.getOptimization().equals("Heuristic Optimization")) {
 				rs = stmt.executeQuery(query.getQuery());
 			} else if(query.getOptimization().equals("Indexes")) {
 				for (int l = 0; l < query.getCreateIndexes().size(); l++) {
-					stmt.execute(query.getCreateIndexes().get(l));
+					anotherStmt.execute(query.getCreateIndexes().get(l));
 				}
 				rs = stmt.executeQuery(query.getQuery());
 				for (int l = 0; l < query.getDropIndexes().size(); l++) {
-					stmt.execute(query.getDropIndexes().get(l));
+					anotherStmt.execute(query.getDropIndexes().get(l));
 				}
 			} else if(query.getOptimization().equals("Views")) {
 				for (int l = 0; l < query.getCreateViews().size(); l++) {
-					stmt.executeUpdate(query.getCreateViews().get(l));
+					anotherStmt.executeUpdate(query.getCreateViews().get(l));
 				}
 				rs = stmt.executeQuery(query.getQuery());
 				

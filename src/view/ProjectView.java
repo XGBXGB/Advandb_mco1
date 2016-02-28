@@ -275,7 +275,7 @@ public class ProjectView extends JFrame implements ActionListener{
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
 		} else if(e.getSource() == timeBtn) {
-			qc.setTimes();
+//			qc.setTimes();
 			DecimalFormat df = new DecimalFormat("#.000000");
 			QuerySet[] qss = qc.getQuerySets();
 			for (int i = 0; i < qss.length; i++) {
