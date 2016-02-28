@@ -6,18 +6,37 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 import model.DBConnect;
+import model.Query;
 
 public class TableFromMySqlDatabase extends JFrame {
 	public TableFromMySqlDatabase() {
 		
 	}
 
-	public DefaultTableModel getResultTable(String query) {
+	public DefaultTableModel getResultTable(Query query) {
 		ArrayList<String> columnNames = new ArrayList<String>();
 		ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-		try (Connection connection = DBConnect.getConnection();
-				Statement stmt = connection.createStatement();
-				ResultSet rs = stmt.executeQuery(query)) {
+		try{
+			Connection connection = DBConnect.getConnection();
+			Statement stmt = connection.createStatement();
+			ResultSet rs = null;
+			if(query.getOptimization().equals("No Optimization") || query.getOptimization().equals("Heuristic Optimization")) {
+				rs = stmt.executeQuery(query.getQuery());
+			} else if(query.getOptimization().equals("Indexes")) {
+				for (int l = 0; l < query.getCreateIndexes().size(); l++) {
+					stmt.execute(query.getCreateIndexes().get(l));
+				}
+				rs = stmt.executeQuery(query.getQuery());
+				for (int l = 0; l < query.getDropIndexes().size(); l++) {
+					stmt.execute(query.getDropIndexes().get(l));
+				}
+			} else if(query.getOptimization().equals("Views")) {
+				for (int l = 0; l < query.getCreateViews().size(); l++) {
+					stmt.executeUpdate(query.getCreateViews().get(l));
+				}
+				rs = stmt.executeQuery(query.getQuery());
+				
+			}
 			ResultSetMetaData md = rs.getMetaData();
 			int columns = md.getColumnCount();
 			// Get column names

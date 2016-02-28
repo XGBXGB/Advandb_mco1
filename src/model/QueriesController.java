@@ -3,6 +3,7 @@ package model;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class QueriesController {
 	private QuerySet[] querySets;
@@ -27,19 +28,40 @@ public class QueriesController {
 		twoTablesOptimiz4.addTable("filteredMem_v M, brgyIdHH_v H");
 		twoTablesOptimiz4.addCondition("H.id = M.id");
 
-		Query[] twoTablesSet1 = { twoTablesOptimiz1, twoTablesOptimiz2, new Query("SELECT * FROM hpq_hh LIMIT 3;"),
-				twoTablesOptimiz4, new Query("SELECT * FROM hpq_hh LIMIT 5;") };
+		Query[] twoTablesSet1 = { twoTablesOptimiz1, twoTablesOptimiz2, new Query("SELECT * FROM hpq_hh LIMIT 3;", ""),
+				twoTablesOptimiz4, new Query("SELECT * FROM hpq_hh LIMIT 5;", "") };
 
+		ArrayList<String> createIndexes = new ArrayList<String>();
+		createIndexes.add("CREATE INDEX member_psced7_idx ON hpq_mem (psced7);");
+		createIndexes.add("CREATE INDEX member_educal_idx ON hpq_mem (educal);");
+		createIndexes.add("CREATE INDEX member_jobind_idx ON hpq_mem (jobind);");
+		
+		ArrayList<String> dropIndexes = new ArrayList<String>();
+		dropIndexes.add("DROP INDEX member_psced7_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_educal_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_jobind_idx ON hpq_mem;");
+		
+		ArrayList<String> createViews = new ArrayList<String>();
+		createViews.add("CREATE OR REPLACE VIEW coursesView AS SELECT psced7 FROM hpq_mem  WHERE educal in (300, 400) AND jobind = 2;");
+		
 		Query[] queries = {
 				new Query(
-						"SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7"),
+						"SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7",
+						"No Optimization"),
 				new Query(
-						"SELECT psced7, count(*) FROM (SELECT psced7 FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2) t GROUP BY psced7"),
+						"SELECT psced7, count(*) FROM (SELECT psced7 FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2) t GROUP BY psced7", 
+						"Heuristic Optimization"),
 				new Query(
-						"CREATE INDEX member_psced7_idx ON hpq_mem (psced7); CREATE INDEX member_educal_idx ON hpq_mem (educal); CREATE INDEX member_jobind_idx ON hpq_mem (jobind); SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7; DROP INDEX member_psced7_idx ON hpq_mem; DROP INDEX member_educal_idx ON hpq_mem;DROP INDEX member_jobind_idx ON hpq_mem;"),
+						"SELECT psced7, count(*) FROM hpq_mem WHERE educal in (300, 400) AND jobind = 2 GROUP BY psced7; ", 
+						"Indexes",
+						createIndexes, dropIndexes),
 				new Query(
-						"CREATE OR REPLACE VIEW coursesView AS SELECT psced7FROM hpq_memWHERE educal in (300, 400) AND jobind = 2;            SELECT psced7, count(psced7)FROM coursesViewGROUP BY psced7;"),
-				new Query("SELECT * FROM hpq_hh LIMIT 5;"), };
+						"SELECT psced7, count(psced7)FROM coursesView GROUP BY psced7;",
+						"Views",
+						createViews),
+				new Query(
+						"SELECT * FROM hpq_hh LIMIT 5;",
+						"Stored Procedures"), };
 		querySets[0] = new QuerySet(queries, "description", "1 Table");
 		querySets[1] = new QuerySet(queries,
 				"Count of members who have college/masters/doctral degree but are unemployed per course.",
@@ -73,18 +95,41 @@ public class QueriesController {
 		return querySets;
 	}
 
-	public void query10Times(int i, int j, String queryString) {
+	public void query10Times(int i, int j) {
 		try {
 			Connection connection = DBConnect.getConnection();
 			Statement stmt = connection.createStatement();
+			Query q = querySets[i].getQuerries()[j];
 			double[] execTimes = new double[10];
 			for (int k = 0; k < execTimes.length; k++) {
-
-				long startTime = System.currentTimeMillis();
-				stmt.execute(queryString);
-				long endTime = System.currentTimeMillis();
+				long startTime = 0;
+				long endTime = 0;
+				if(q.getOptimization().equals("No Optimization") || q.getOptimization().equals("Heuristic Optimization")) {
+					startTime = System.currentTimeMillis();
+					stmt.executeQuery(q.getQuery());
+					endTime = System.currentTimeMillis();
+				} else if(q.getOptimization().equals("Indexes")) {
+					
+					for (int l = 0; l < q.getCreateIndexes().size(); l++) {
+						stmt.execute(q.getCreateIndexes().get(l));
+					}
+					startTime = System.currentTimeMillis();
+					stmt.executeQuery(q.getQuery());
+					endTime = System.currentTimeMillis();
+					for (int l = 0; l < q.getDropIndexes().size(); l++) {
+						stmt.execute(q.getDropIndexes().get(l));
+					}
+					
+				} else if(q.getOptimization().equals("Views")) {
+					for (int l = 0; l < q.getCreateViews().size(); l++) {
+						stmt.execute(q.getCreateViews().get(l));
+					}
+					startTime = System.currentTimeMillis();
+					stmt.executeQuery(q.getQuery());
+					endTime = System.currentTimeMillis();
+					
+				}
 				execTimes[k] = (endTime - startTime) / 1000.0;
-				System.out.println(execTimes[k]);
 			}
 			querySets[i].getQuerries()[j].setExecTimes(execTimes);
 		} catch (Exception e) {
@@ -99,13 +144,36 @@ public class QueriesController {
 			for (int i = 0; i < querySets.length; i++) {
 				Query[] qs = querySets[i].getQuerries();
 				for (int j = 0; j < qs.length; j++) {
+					Query q = querySets[i].getQuerries()[j];
 					double[] execTimes = new double[10];
 					System.out.println(qs[j].getQuery());
 					for (int k = 0; k < execTimes.length; k++) {
 
-						long startTime = System.currentTimeMillis();
-						stmt.execute(qs[j].getQuery());
-						long endTime = System.currentTimeMillis();
+						long startTime = 0;
+						long endTime = 0;
+						if(q.getOptimization().equals("No Optimization") || q.getOptimization().equals("Heuristic Optimization")) {
+							startTime = System.currentTimeMillis();
+							stmt.executeQuery(q.getQuery());
+							endTime = System.currentTimeMillis();
+						} else if(q.getOptimization().equals("Indexes")) {
+							for (int l = 0; l < q.getCreateIndexes().size(); l++) {
+								stmt.execute(q.getCreateIndexes().get(l));
+							}
+							startTime = System.currentTimeMillis();
+							stmt.executeQuery(q.getQuery());
+							endTime = System.currentTimeMillis();
+							for (int l = 0; l < q.getDropIndexes().size(); l++) {
+								stmt.execute(q.getDropIndexes().get(l));
+							}
+						} else if(q.getOptimization().equals("Views")) {
+							for (int l = 0; l < q.getCreateViews().size(); l++) {
+								stmt.executeUpdate(q.getCreateViews().get(l));
+							}
+							startTime = System.currentTimeMillis();
+							stmt.executeQuery(q.getQuery());
+							endTime = System.currentTimeMillis();
+							
+						}
 						execTimes[k] = (endTime - startTime) / 1000.0;
 						System.out.println(execTimes[k]);
 					}

@@ -200,7 +200,6 @@ public class ProjectView extends JFrame implements ActionListener{
 			
 			int i = queryCBox.getSelectedIndex();
 			int j = optimizeCBox.getSelectedIndex();
-			desc.setText("<html>" + qc.getQuerySets()[i].getDescription() + "</html>");
 			Query q = qc.getQueryObject(i, j);
 			String queryString = "";
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
@@ -210,16 +209,16 @@ public class ProjectView extends JFrame implements ActionListener{
 						query.addCondition(conditions.get(x).getQueryCondition());
 					}
 					System.out.println(query.getQuery());
-					table.setModel(tfmsd.getResultTable(query.getQuery()));
+					table.setModel(tfmsd.getResultTable(query));
 					resizeColumnWidth(table);
 					queryString = query.getQuery();
 				}
 			} else{
-				table.setModel(tfmsd.getResultTable(q.getQuery()));
+				table.setModel(tfmsd.getResultTable(q));
 				resizeColumnWidth(table);
 				queryString = q.getQuery();
 			}
-			qc.query10Times(i, j, queryString);	
+			qc.query10Times(i, j);	
 			String s = "";
 			for (int k = 0; k < 10; k++) {
 				switch(k) {
@@ -235,6 +234,9 @@ public class ProjectView extends JFrame implements ActionListener{
 			
 		}
 		else if(e.getSource() == queryCBox){
+			int i = queryCBox.getSelectedIndex();
+			int j = optimizeCBox.getSelectedIndex();
+			desc.setText("<html>" + qc.getQuerySets()[i].getDescription() + "</html>");
 			if(queryCBox.getSelectedItem().toString().startsWith("2")){
 				addCondBtn.setVisible(true);
 				if(conditionSp==null){
