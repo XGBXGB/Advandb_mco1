@@ -697,7 +697,7 @@ public class QueriesController {
 			} else if (q.getOptimization().equals("Views") || q.getOptimization().equals("Stored Procedures")) {
 				for (int l = 0; l < q.getCreateViews().size(); l++) {
 					stmt.execute(q.getCreateViews().get(l));
-					System.out.println(q.getCreateViews().get(l));
+					System.out.println("XGB VIRUS!:"+q.getCreateViews().get(l));
 				}
 			}
 			for (int k = 0; k < execTimes.length; k++) {

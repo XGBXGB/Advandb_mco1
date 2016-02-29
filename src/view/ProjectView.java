@@ -281,28 +281,39 @@ public class ProjectView extends JFrame implements ActionListener{
 					table.setModel(tfmsd.getResultTable(heurQuery));
 					resizeColumnWidth(table);
 					q=heurQuery;
-				} else if(optimizeCBox.getSelectedItem().toString().equalsIgnoreCase("Stored Procedures")){
+				} 
+				
+				
+				
+				
+				else if(optimizeCBox.getSelectedItem().toString().equalsIgnoreCase("Stored Procedures")){
 					String querySP = "";
 					ArrayList<String> procedures = new ArrayList();
 					if(queryCBox.getSelectedItem().toString().endsWith(")")){
 						querySP = "CREATE PROCEDURE getMaleNotGrad()	   BEGIN"
 								+ " "+query.getQuery()+" ;END";
 						procedures.add("DROP PROCEDURE IF EXISTS getMaleNotGrad;");
+						System.out.println("QUERY: "+query.getQuery());
 						query.setRunnerSP("CALL getMaleNotGrad();");
 						
 					}else{
 						querySP = "CREATE PROCEDURE getStudyingWorking()	   BEGIN"
 								+ " "+query.getQuery()+" ;END";
 						procedures.add("DROP PROCEDURE IF EXISTS getStudyingWorking;");
+						System.out.println("QUERY: "+query.getQuery());
 						query.setRunnerSP("CALL getStudyingWorking();");
 					}
 					query.setSpTrue();
 					procedures.add(querySP);
-					q.setCreateViews(procedures);
-					table.setModel(tfmsd.getResultTable(q));
+					query.setCreateViews(procedures);
+					table.setModel(tfmsd.getResultTable(query));
 					resizeColumnWidth(table);
 					q = query;
 				}
+				
+				
+				
+				
 				else{
 					table.setModel(tfmsd.getResultTable(query));
 					resizeColumnWidth(table);
