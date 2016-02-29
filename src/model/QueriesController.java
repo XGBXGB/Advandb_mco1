@@ -21,7 +21,21 @@ public class QueriesController {
 		dropIndexes.add("DROP INDEX member_solo_parent_idx ON hpq_mem;");
 		
 		createViews = new ArrayList<String>();
-		createViews.add("CREATE OR REPLACE VIEW ofwView AS SELECT * FROM hpq_mem WHERE ofw = 1 AND solo_parent = 1");
+		createViews.add("DROP TABLE IF EXISTS ofwView;");
+		createViews.add("CREATE TABLE ofwView AS"
+				+ "		     SELECT *"
+				+ "		     FROM hpq_mem"
+				+ "		     WHERE ofw = 1"
+				+ "		           AND solo_parent = 1;");
+
+		procedures = new ArrayList<String>();
+		procedures.add("DROP PROCEDURE IF EXISTS getOFWSolo;");
+		procedures.add("CREATE PROCEDURE getOFWSolo()"
+				+ "		   BEGIN"
+				+ "		SELECT *"
+				+ "		FROM hpq_mem"
+				+ "		WHERE ofw = 1 and solo_parent = 1;"
+				+ "		   END;");
 		
 		Query[] queries = {
 				new Query(
@@ -39,8 +53,8 @@ public class QueriesController {
 						"Views",
 						createViews),
 				new Query(
-						"SELECT * FROM hpq_hh LIMIT 5;",
-						"Stored Procedures"), };
+						"CALL getOFWSolo();",
+						"Stored Procedures", procedures) };
 
 		//1 table 2nd query
 		
@@ -55,7 +69,21 @@ public class QueriesController {
 		dropIndexes.add("DROP INDEX member_jobind_idx ON hpq_mem;");
 		
 		createViews = new ArrayList<String>();
-		createViews.add("CREATE OR REPLACE VIEW coursesView AS SELECT psced7 FROM hpq_mem  WHERE educal in (300, 400) AND jobind = 2;");
+		createViews.add("DROP TABLE IF EXISTS coursesView;");
+		createViews.add("CREATE TABLE coursesView AS "
+				+ "			SELECT psced7"
+				+ "			FROM hpq_mem"
+				+ "			WHERE educal in (300, 400)"
+				+ "		            AND jobind = 2;");
+		
+		procedures = new ArrayList<String>();
+		procedures.add("DROP PROCEDURE IF EXISTS getUnemployedGrad;");
+		procedures.add("CREATE PROCEDURE getUnemployedGrad()"
+				+ "		   BEGIN"
+				+ "		SELECT *"
+				+ "		FROM hpq_mem"
+				+ "		WHERE ofw = 1 and solo_parent = 1;"
+				+ "		   END;");
 		
 		Query[] queries2 = {
 				new Query(
@@ -73,8 +101,8 @@ public class QueriesController {
 						"Views",
 						createViews),
 				new Query(
-						"SELECT * FROM hpq_hh LIMIT 5;",
-						"Stored Procedures"), };
+						"CALL getUnemployedGrad();",
+						"Stored Procedures", procedures) };
 
 		FilterQueryBuilder twoTablesOptimiz1, twoTablesOptimiz2, twoTablesOptimiz3, twoTablesOptimiz4, twoTablesOptimiz5;
 		FilterQueryBuilder twoTables2Optimiz1, twoTables2Optimiz2, twoTables2Optimiz3, twoTables2Optimiz4, twoTables2Optimiz5;
@@ -128,9 +156,15 @@ public class QueriesController {
 		
 		//TABLE2 W/ COND (1) VIEWS OPTIMIZATION//
 		createViews = new ArrayList<String>();
-		createViews.add("CREATE OR REPLACE VIEW filteredMem_v AS SELECT id, memno, sex, age_yr, occup, work_ddhrs "
-				+ "FROM hpq_mem WHERE jobind=1 AND age_yr<18 and educind=1;");
-		createViews.add("CREATE OR REPLACE VIEW brgyIdHH_v AS SELECT id,brgy FROM hpq_hh;");
+		createViews.add("DROP TABLE IF EXISTS filteredMem_v;");
+		createViews.add("CREATE TABLE filteredMem_v AS"
+				+ "		SELECT id, memno, sex, age_yr, occup, work_ddhrs"
+				+ "		FROM hpq_mem"
+				+ "		WHERE jobind=1 AND age_yr<18 and educind=1;");
+		createViews.add("DROP TABLE IF EXISTS brgyIdHH_v;");
+		createViews.add("CREATE TABLE brgyIdHH_v AS"
+				+ "		SELECT id,brgy"
+				+ "		FROM hpq_hh;");
 		
 		twoTablesOptimiz4 = new FilterQueryBuilder();
 		twoTablesOptimiz4.addColumn("H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs");
@@ -205,9 +239,16 @@ public class QueriesController {
 		
 		//TABLE2 W/ COND (2) VIEWS OPTIMIZATION//
 		createViews = new ArrayList<String>();
-		createViews.add("CREATE OR REPLACE VIEW filteredMem_v AS SELECT id, memno FROM hpq_mem "
-				+ "WHERE educal NOT IN(210,300,400) AND age_yr>22 AND educind=2 AND sex=1;");
-		createViews.add("CREATE OR REPLACE VIEW brgyIdHH_v AS SELECT id,brgy FROM hpq_hh;");
+		createViews.add("DROP TABLE IF EXISTS filteredMem_v;");
+		createViews.add("CREATE TABLE filteredMem_v AS"
+				+ "		SELECT id, memno"
+				+ "		FROM hpq_mem"
+				+ "		WHERE educal NOT IN(210,300,400)"
+				+ "		AND age_yr>22 AND educind=2 AND sex=1;");
+		createViews.add("		DROP TABLE IF EXISTS brgyIdHH_v;");
+		createViews.add("CREATE TABLE brgyIdHH_v AS"
+				+ "		SELECT id,brgy"
+				+ "		FROM hpq_hh;");
 		
 		twoTables2Optimiz4 = new FilterQueryBuilder();
 		twoTables2Optimiz4.addColumn("brgy, COUNT(*)");
@@ -612,7 +653,7 @@ public class QueriesController {
 						+ "occup LIKE \"%fisherman%\" OR occup = \"%mangingisda%\"	) H  ON G.id = H.id	) I"
 						+ "    WHERE id not in (SELECT M2.id FROM hpq_mem M2 JOIN  hpq_cshforwrk_mem CW"
 						+ "	ON M2.id = CW.hpq_hh_id	AND M2.memno = CW.cshforwrk_mem_refno  ) GROUP BY id ) X"
-						+ " JOIN (SELECT id FROM hpq_mem WHERE educind = 1) Y ON X.id = Y.id"
+						+ " JOIN (SELECT id FROM hpq_mem WHERE educind = 1) Y ON X.id = Y.id "
 						+ "GROUP BY Y.id;", 
 						"Heuristic Optimization"),
 				new Query(
@@ -660,7 +701,7 @@ public class QueriesController {
 		querySets[5] = new QuerySet(queries4,
 				"Average age of Philhealth - individually paying members per barangay, for households with at least 2 Philhealth - individually paying members",
 				"3 Tables (2)");
-		querySets[6] = new QuerySet(queries,
+		querySets[6] = new QuerySet(queries5,
 				"List of the number of household members studying and how many of those are actively participating (for the past 12 months) in the food for school program per household that has a member that is not an ofw and works as a fisherman (mangingisda) that is not under the cash for work program who uses a fishing equipment that he/she does not own.",
 				"4 Table");
 	}

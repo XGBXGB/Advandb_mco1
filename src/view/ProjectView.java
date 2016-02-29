@@ -99,7 +99,7 @@ public class ProjectView extends JFrame implements ActionListener{
 		qc = new QueriesController();
 		tfmsd = new TableFromMySqlDatabase();
 		
-		desc = new JLabel("<html>List of the number of household members studying and how many of those are actively participating (for the past 12 months) in the food for school program per household that has a member that is not an ofw and works as a fisherman (mangingisda) that is not under the cash for work program who uses a fishing equipment that he/she does not own.</html>");
+		desc = new JLabel("<html>Count of members who have college/masters/doctral degree but are unemployed per course.</html>");
 		desc.setBounds(10, 0, 710, 70);
 		
 		String columnNames[] = { "", "No Optimization", "Heuristic Optimization", "Indices", "Views", "Stored Procedures" };
