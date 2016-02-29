@@ -77,7 +77,7 @@ public class FilterQueryBuilder extends Query{
         if (groupBy.length() == 0) {
             groupBy = "GROUP BY " + group + ", ";
         } else {
-            groupBy = groupBy + " " + group + ",";
+            groupBy = groupBy + " " + group + ", ";
         }
     }
 
@@ -99,7 +99,7 @@ public class FilterQueryBuilder extends Query{
     	if(where.length()>6)
     		query +=where.substring(0, where.length() - 4)+" ";
     	if(groupBy.length()!=0)
-    		query +=groupBy.substring(0, groupBy.length() - 1);
+    		query +=groupBy.substring(0, groupBy.length() - 2);
     	if(having.length()!=0)
     		query +=having;
     	if(orderBy.length()!=0)
@@ -126,14 +126,13 @@ public class FilterQueryBuilder extends Query{
     /*
     public static void main (String[] args){
     	FilterQueryBuilder f = new FilterQueryBuilder();
-    	f = new FilterQueryBuilder();
-		f.addColumn("H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs");
-		f.addTable("(SELECT id, memno, sex, age_yr, occup, work_ddhrs FROM hpq_mem "
-				+ "WHERE jobind=1 AND age_yr<18 and educind=1) M JOIN (SELECT id, brgy FROM hpq_hh) H "
-				+ "ON H.id = M.id");
+    	f.addColumn("id, memno");
+		f.addTable("hpq_mem");
+		f.addCondition("educal NOT IN(210,300,400) AND age_yr>20 AND educind=2 AND sex=1");
+		f.addGrouping("brgy");
 		System.out.println(f.getQuery());
-    }
-    */
+    }*/
+    
     
     
 }
