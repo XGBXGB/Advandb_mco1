@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -47,7 +48,54 @@ public class ProjectView extends JFrame implements ActionListener{
 	public ArrayList<String> columns2;
 	private String[][] values;
 	
+	private JLabel triTablecondLbl1, triTablecondLbl2, triTablecondLbl3, triTablecondLbl4, triTable2condLbl1;
+	private JTextField triTablecondTxt1, triTablecondTxt2, triTablecondTxt3, triTablecondTxt4, triTable2condTxt1;
 	public ProjectView(){
+		
+		triTablecondLbl1 = new JLabel("hasPregnant");
+		triTablecondLbl1.setBounds(20,350, 150, 25);
+		triTablecondLbl1.setVisible(false);
+		
+		triTablecondLbl2 = new JLabel("hasDisabled");
+		triTablecondLbl2.setBounds(20,380, 150, 25);
+		triTablecondLbl2.setVisible(false);
+		
+		triTablecondLbl3 = new JLabel("memSex");
+		triTablecondLbl3.setBounds(20,410, 150, 25);
+		triTablecondLbl3.setVisible(false);
+		
+		triTablecondLbl4 = new JLabel("hhSize");
+		triTablecondLbl4.setBounds(20,440, 150, 25);
+		triTablecondLbl4.setVisible(false);
+		
+		triTable2condLbl1 = new JLabel("causeDeath");
+		triTable2condLbl1.setBounds(20,350, 150, 25);
+		triTable2condLbl1.setVisible(false);
+		
+		triTablecondTxt1 = new JTextField();
+		triTablecondTxt1.setBounds(180,350, 150, 25);
+		triTablecondTxt1.setVisible(false);
+		
+		triTablecondTxt2 = new JTextField();
+		triTablecondTxt2.setBounds(180,380, 150, 25);
+		triTablecondTxt2.setVisible(false);
+		
+		triTablecondTxt3 = new JTextField();
+		triTablecondTxt3.setBounds(180,410, 150, 25);
+		triTablecondTxt3.setVisible(false);
+		
+		
+		triTablecondTxt4 = new JTextField();
+		triTablecondTxt4.setBounds(180,440, 150, 25);
+		triTablecondTxt4.setVisible(false);
+		
+		triTable2condTxt1 = new JTextField();
+		triTable2condTxt1.setBounds(180,350, 150, 25);
+		triTable2condTxt1.setVisible(false);
+		
+		
+		
+		
 		qc = new QueriesController();
 		tfmsd = new TableFromMySqlDatabase();
 		
@@ -175,6 +223,18 @@ public class ProjectView extends JFrame implements ActionListener{
 		queryPanel.add(tableSp);
 		queryPanel.add(addCondBtn);
 		queryPanel.add(desc);
+		
+		queryPanel.add(triTablecondLbl1);
+		queryPanel.add(triTablecondLbl2);
+		queryPanel.add(triTablecondLbl3);
+		queryPanel.add(triTablecondLbl4);
+		queryPanel.add(triTable2condLbl1);
+		
+		queryPanel.add(triTablecondTxt1);
+		queryPanel.add(triTablecondTxt2);
+		queryPanel.add(triTablecondTxt3);
+		queryPanel.add(triTablecondTxt4);
+		queryPanel.add(triTable2condTxt1);
 		queryPanel.setLayout(null);
 		
 		timePanel = new JPanel();
@@ -227,7 +287,22 @@ public class ProjectView extends JFrame implements ActionListener{
 					resizeColumnWidth(table);
 					q=query;
 				}
-			} else{
+			} else if(queryCBox.getSelectedItem().toString().startsWith("3")) {
+				ArrayList<String> setters= new ArrayList<String>();
+				if(queryCBox.getSelectedItem().toString().endsWith(")")){
+					setters.add("SET @causeDeath := " + triTable2condTxt1.getText() + ";");
+					q.setSetters(setters);
+				}else{
+					setters.add("SET @hasPregnant := " + triTablecondTxt1.getText() + ";");
+					setters.add("SET @hasDisabled := " + triTablecondTxt2.getText() + ";");
+					setters.add("SET @memSex := " + triTablecondTxt3.getText() + ";");
+					setters.add("SET @hhSize := " + triTablecondTxt4.getText() + ";");
+					q.setSetters(setters);
+				}
+				table.setModel(tfmsd.getResultTable(q));
+				resizeColumnWidth(table);
+			
+			} else {
 				table.setModel(tfmsd.getResultTable(q));
 				resizeColumnWidth(table);
 			}
@@ -271,7 +346,28 @@ public class ProjectView extends JFrame implements ActionListener{
 					conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 					conditionTable.setRowHeight(80);
 				}
+				hideCond1();
+				hideCond2();
+			}else if (queryCBox.getSelectedItem().toString().startsWith("3")){
+				if(conditionSp!=null){
+					addCondBtn.setVisible(false);
+					conditions = null;
+					queryPanel.remove(conditionSp);
+					conditionSp=null;
+					queryPanel.revalidate();
+					queryPanel.repaint();
+				}
+				if(queryCBox.getSelectedItem().toString().endsWith(")")){
+					showCond2();
+					hideCond1();
+				}else{
+					showCond1();
+					hideCond2();
+				}
+				
 			}else{
+				hideCond1();
+				hideCond2();
 				if(conditionSp!=null){
 					addCondBtn.setVisible(false);
 					conditions = null;
@@ -301,6 +397,44 @@ public class ProjectView extends JFrame implements ActionListener{
 				}
 			}
 		}
+	}
+	
+	public void hideCond1(){
+		triTablecondLbl1.setVisible(false);
+		triTablecondLbl2.setVisible(false);
+		triTablecondLbl3.setVisible(false);
+		triTablecondLbl4.setVisible(false);
+		
+		triTablecondTxt1.setVisible(false);
+		triTablecondTxt1.setText("");
+		triTablecondTxt2.setVisible(false);
+		triTablecondTxt2.setText("");
+		triTablecondTxt3.setVisible(false);
+		triTablecondTxt3.setText("");
+		triTablecondTxt4.setVisible(false);
+		triTablecondTxt4.setText("");
+	}
+	
+	public void showCond1(){
+		triTablecondLbl1.setVisible(true);
+		triTablecondLbl2.setVisible(true);
+		triTablecondLbl3.setVisible(true);
+		triTablecondLbl4.setVisible(true);
+		triTablecondTxt1.setVisible(true);
+		triTablecondTxt2.setVisible(true);
+		triTablecondTxt3.setVisible(true);
+		triTablecondTxt4.setVisible(true);
+	}
+	
+	public void hideCond2(){
+		triTable2condLbl1.setVisible(false);
+		triTable2condTxt1.setVisible(false);
+		triTable2condTxt1.setText("");
+	}
+	
+	public void showCond2(){
+		triTable2condLbl1.setVisible(true);
+		triTable2condTxt1.setVisible(true);
 	}
 	
 	public void removePanel(ConditionPanel object){

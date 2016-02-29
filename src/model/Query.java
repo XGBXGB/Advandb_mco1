@@ -6,6 +6,7 @@ public class Query {
 	private String query;
 	private double[] execTimes;
 	protected String optimization;
+	protected ArrayList<String> setters;
 	protected ArrayList<String> createViews;
 	protected ArrayList<String> createIndexes;
 	protected ArrayList<String> dropIndexes;
@@ -49,6 +50,13 @@ public class Query {
 		this.optimization = optimization;
 		this.createViews = createViews;
 		execTimes = new double[10];
+	}
+	
+	public void setSetters(ArrayList<String> setters) {
+		this.setters = setters;
+	}
+	public ArrayList<String> getSetters() {
+		return setters;
 	}
 	
 	public String getOptimization() {

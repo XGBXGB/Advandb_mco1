@@ -21,6 +21,11 @@ public class TableFromMySqlDatabase extends JFrame {
 			Statement stmt = connection.createStatement();
 			Statement anotherStmt = connection.createStatement();
 			ResultSet rs = null;
+			if(query.getSetters() != null) {
+				for (int i = 0; i < query.getSetters().size(); i++) {
+					stmt.execute(query.getSetters().get(i));
+				}
+			}
 			if(query.getOptimization().equals("No Optimization") || query.getOptimization().equals("Heuristic Optimization")) {
 				rs = stmt.executeQuery(query.getQuery());
 			} else if(query.getOptimization().equals("Indexes")) {
@@ -32,7 +37,7 @@ public class TableFromMySqlDatabase extends JFrame {
 				for (int l = 0; l < query.getDropIndexes().size(); l++) {
 					anotherStmt.execute(query.getDropIndexes().get(l));
 				}
-			} else if(query.getOptimization().equals("Views")) {
+			} else if(query.getOptimization().equals("Views") || query.getOptimization().equals("Stored Procedures")) {
 				for (int l = 0; l < query.getCreateViews().size(); l++) {
 					anotherStmt.executeUpdate(query.getCreateViews().get(l));
 				}
@@ -41,6 +46,7 @@ public class TableFromMySqlDatabase extends JFrame {
 			}
 			ResultSetMetaData md = rs.getMetaData();
 			int columns = md.getColumnCount();
+			System.out.println("c " + columns);
 			// Get column names
 			for (int i = 1; i <= columns; i++) {
 				columnNames.add(md.getColumnName(i));
@@ -59,6 +65,7 @@ public class TableFromMySqlDatabase extends JFrame {
 
 				data.add(row);
 			}
+			System.out.println("r " + data.size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
