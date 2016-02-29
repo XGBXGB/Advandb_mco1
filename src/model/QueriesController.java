@@ -76,8 +76,8 @@ public class QueriesController {
 						"SELECT * FROM hpq_hh LIMIT 5;",
 						"Stored Procedures"), };
 
-		FilterQueryBuilder twoTablesOptimiz1, twoTablesOptimiz2, twoTablesOptimiz3, twoTablesOptimiz4;
-		FilterQueryBuilder twoTables2Optimiz1, twoTables2Optimiz2, twoTables2Optimiz3, twoTables2Optimiz4;
+		FilterQueryBuilder twoTablesOptimiz1, twoTablesOptimiz2, twoTablesOptimiz3, twoTablesOptimiz4, twoTablesOptimiz5;
+		FilterQueryBuilder twoTables2Optimiz1, twoTables2Optimiz2, twoTables2Optimiz3, twoTables2Optimiz4, twoTables2Optimiz5;
 		
 		//TABLE2 W/ COND (1) NO OPTIMIZATION//
 		twoTablesOptimiz1 = new FilterQueryBuilder();
@@ -140,10 +140,18 @@ public class QueriesController {
 		twoTablesOptimiz4.setCreateViews(createViews);
 		//TABLE2 W/ COND (1) VIEWS OPTIMIZATION//
 		
+		//TABLE2 W/ COND (1) SP OPTIMIZATION//
+		twoTablesOptimiz5 = new FilterQueryBuilder();
+		twoTablesOptimiz5.addColumn("H.id, M.memno, H.brgy, M.sex, M.age_yr, M.occup, M.work_ddhrs");
+		twoTablesOptimiz5.addTable("hpq_mem M, hpq_hh H");
+		twoTablesOptimiz5.addCondition("jobind=1 AND age_yr<18 and educind=1 AND H.id = M.id");
+		twoTablesOptimiz5.setOptimization("Stored Procedures");
+		//TABLE2 W/ COND (1) SP OPTIMIZATION//
+		
 		
 
 		Query[] twoTablesSet1 = { twoTablesOptimiz1, twoTablesOptimiz2, twoTablesOptimiz3,
-				twoTablesOptimiz4, new Query("SELECT * FROM hpq_hh LIMIT 5;", "") };
+				twoTablesOptimiz4, twoTablesOptimiz5 };
 
 		
 		//TABLE2 W/ COND (2) NO OPTIMIZATION//
@@ -210,8 +218,18 @@ public class QueriesController {
 		twoTables2Optimiz4.setCreateViews(createViews);
 		//TABLE2 W/ COND (2) VIEWS OPTIMIZATION//
 		
+		//TABLE2 W/ COND (2) SP OPTIMIZATION//
+		twoTables2Optimiz5 = new FilterQueryBuilder();
+		twoTables2Optimiz5.addColumn("brgy, COUNT(*)");
+		twoTables2Optimiz5.addTable("hpq_mem M, hpq_hh H");
+		twoTables2Optimiz5.addCondition("educal NOT IN (210,300,400) AND age_yr>22 AND educind=2 AND sex=1 "
+				+ "AND M.id=H.id");
+		twoTables2Optimiz5.addGrouping("brgy");
+		twoTables2Optimiz5.setOptimization("Stored Procedures");
+		//TABLE2 W/ COND (2) SP OPTIMIZATION//
+		
 		Query[] twoTablesSet2 = { twoTables2Optimiz1, twoTables2Optimiz2, twoTables2Optimiz3,
-				twoTables2Optimiz4, new Query("SELECT * FROM hpq_hh LIMIT 5;", "") };
+				twoTables2Optimiz4, twoTables2Optimiz5 };
 		
 	
 		// 3 tables
@@ -364,6 +382,7 @@ public class QueriesController {
 		
 
 		// 3 tables (2)
+		createIndexes = new ArrayList<String>();
 		createIndexes.add("		CREATE INDEX death_mdeadage_idx ON hpq_death (mdeadage);");
 		createIndexes.add("		CREATE INDEX hh_id_idx ON hpq_hh (id);");
 		createIndexes.add("		CREATE INDEX mem_id_idx ON hpq_mem (id);");
@@ -472,6 +491,156 @@ public class QueriesController {
 						"CALL getDeathAge(@causeDeath);",
 						"Stored Procedures",procedures), };
 		
+		
+		
+		
+		//4-5 TABLES
+		//indexes
+		createIndexes = new ArrayList<String>();
+		createIndexes.add("CREATE INDEX member_id_idx ON hpq_mem (id);");
+		createIndexes.add("CREATE INDEX member_educind_idx ON hpq_mem (educind);");
+		createIndexes.add("CREATE INDEX member_memno_idx ON hpq_mem (memno);");
+		createIndexes.add("CREATE INDEX hh_id_idx ON hpq_hh (id);");
+		createIndexes.add("CREATE INDEX hh_ffs_idx ON hpq_hh (prog_fudforsch);");
+		createIndexes.add("CREATE INDEX cw_id_idx ON hpq_cshforwrk_mem (hpq_hh_id);");
+		createIndexes.add("CREATE INDEX cw_refno_idx ON hpq_cshforwrk_mem (cshforwrk_mem_refno);");
+		createIndexes.add("CREATE INDEX member_ofw_idx ON hpq_mem (ofw);");
+		createIndexes.add("CREATE INDEX member_occup_idx ON hpq_mem (occup);");
+		createIndexes.add("CREATE INDEX ae_id_idx ON hpq_aquaequip (hpq_hh_id);");
+		createIndexes.add("CREATE INDEX ae_aetype_idx ON hpq_aquaequip (aquaequiptype);");
+		createIndexes.add("CREATE INDEX ae_own_idx ON hpq_aquaequip (aquaequiptype_own);");
+		
+		dropIndexes = new ArrayList<String>();
+		dropIndexes.add("DROP INDEX member_id_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_educind_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_memno_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX hh_id_idx ON hpq_hh;");
+		dropIndexes.add("DROP INDEX hh_ffs_idx ON hpq_hh;");
+		dropIndexes.add("DROP INDEX cw_id_idx ON hpq_cshforwrk_mem;");
+		dropIndexes.add("DROP INDEX cw_refno_idx ON hpq_cshforwrk_mem;");
+		dropIndexes.add("DROP INDEX member_ofw_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX member_occup_idx ON hpq_mem;");
+		dropIndexes.add("DROP INDEX ae_id_idx ON hpq_aquaequip;");
+		dropIndexes.add("DROP INDEX ae_aetype_idx ON hpq_aquaequip;");
+		dropIndexes.add("DROP INDEX ae_own_idx ON hpq_aquaequip;");
+		//indexes
+		
+		//views
+		createViews = new ArrayList<String>();
+		createViews.add("DROP TABLE IF EXISTS hhffs;");
+		createViews.add("CREATE TABLE hhffs AS		SELECT id		FROM hpq_hh		WHERE prog_fudforsch = 1;");
+		createViews.add("DROP TABLE IF EXISTS occupfishing;");
+		createViews.add("CREATE TABLE occupfishing AS	SELECT id	FROM hpq_mem WHERE ofw != 1"
+				+ "		AND occup LIKE \"%fishing%\" OR occup LIKE \"%fisherman%\" OR occup = \"%mangingisda%\";");
+		createViews.add("DROP TABLE IF EXISTS aenotown;");
+		createViews.add("CREATE TABLE aenotown AS	SELECT hpq_hh_id AS id	FROM hpq_aquaequip"
+				+ "	WHERE aquaequiptype_own != 1;");
+		createViews.add("DROP TABLE IF EXISTS memCW;");
+		createViews.add("CREATE TABLE memCW AS		SELECT M2.id AS id	FROM hpq_mem M2, hpq_cshforwrk_mem CW"
+				+ "		WHERE M2.id = CW.hpq_hh_id		AND M2.memno = CW.cshforwrk_mem_refno;");
+		createViews.add("DROP TABLE IF EXISTS numstudents;");
+		createViews.add("CREATE TABLE numstudents AS		SELECT M.id AS id, COUNT(*) AS NoOfFFSStudents"
+				+ "		FROM hpq_mem M, hpq_fudforsch_mem FS, hhffs HFS, occupfishing O, aenotown AE"
+				+ "		WHERE M.educind = 1 	AND FS.fudforsch_mem_refno = M.memno	AND FS.hpq_hh_id = M.id"
+				+ "		AND HFS.id = M.id		AND M.id = O.id		AND M.id = AE.id"
+				+ "	AND M.id NOT IN (SELECT * FROM memCW)	GROUP BY M.id;");
+		//views
+		
+		
+
+		
+		procedures = new ArrayList<String>();
+		procedures.add("DROP PROCEDURE IF EXISTS getStudyingFFS;");
+		procedures.add(" CREATE PROCEDURE getStudyingFFS()   BEGIN"
+				+ "	SELECT MEM.id AS HouseHoldID, COUNT(MEM.id) AS NumStudyingTotal, X.NoOfFFSStudents"
+				+ "		FROM	(	SELECT M.id, COUNT(*) AS NoOfFFSStudents "
+				+ "FROM hpq_mem M, hpq_fudforsch_mem FS, hpq_hh H, hpq_aquaequip AE"
+				+ "		WHERE H.id = M.id	AND FS.hpq_hh_id = M.id		AND AE.hpq_hh_id = H.id"
+				+ " 	AND FS.fudforsch_mem_refno = M.memno		AND M.educind = 1"
+				+ "	AND H.prog_fudforsch = 1 AND AE.aquaequiptype_own != 1	AND M.id in "
+				+ "	(   SELECT id		FROM hpq_mem		WHERE ofw != 1"
+				+ "	AND occup LIKE \"%fishing%\" OR occup LIKE \"%fisherman%\" OR occup = \"%mangingisda%\""
+				+ "				)   AND M.id not in	(SELECT M2.id"
+				+ "	FROM hpq_mem M2, hpq_cshforwrk_mem CW	WHERE M2.id = CW.hpq_hh_id"
+				+ "	AND M2.memno = CW.cshforwrk_mem_refno	)	GROUP BY M.id	) X, hpq_mem MEM"
+				+ "		WHERE MEM.educind = 1	AND X.id = MEM.id	GROUP BY MEM.id;   END ");
+
+		
+		
+
+		
+
+
+		
+		
+
+		
+		
+
+		
+		
+		
+		
+		
+		
+		
+		Query[] queries5 = {
+				new Query(
+						"SELECT MEM.id AS HouseHoldID, COUNT(MEM.id) AS NumStudyingTotal, X.NoOfFFSStudents "
+						+ "FROM (	SELECT M.id, COUNT(*) AS NoOfFFSStudents FROM hpq_mem M, "
+						+ "hpq_fudforsch_mem FS, hpq_hh H, hpq_aquaequip AE	WHERE H.id = M.id"
+						+ "	AND FS.hpq_hh_id = M.id	AND AE.hpq_hh_id = H.id	AND FS.fudforsch_mem_refno = M.memno"
+						+ "	AND M.educind = 1 AND H.prog_fudforsch = 1 AND AE.aquaequiptype_own != 1"
+						+ "	AND M.id in    		(   SELECT id"
+						+ "			FROM hpq_mem"
+						+ "			WHERE ofw != 1"
+						+ "			AND occup LIKE \"%fishing%\" OR occup LIKE \"%fisherman%\" OR occup ="
+						+ " \"%mangingisda%\"	)    AND M.id not in (SELECT M2.id	FROM hpq_mem M2, hpq_cshforwrk_mem CW "
+						+ "WHERE M2.id = CW.hpq_hh_id	AND M2.memno = CW.cshforwrk_mem_refno	)"
+						+ "	GROUP BY M.id) X, hpq_mem MEM WHERE MEM.educind = 1 AND X.id = MEM.id "
+						+ "GROUP BY MEM.id;",
+						"No Optimization"),
+				new Query(
+						"SELECT Y.id AS HouseHoldID, COUNT(Y.id) AS NumStudyingTotal, X.NoOfFFSStudents "
+						+ "FROM (SELECT id, Count(*) AS NoOfFFSStudents FROM (SELECT H.id FROM"
+						+ "	(SELECT id FROM	(	SELECT C.id FROM	(	SELECT A.id FROM	("
+						+ "SELECT id, memno	FROM hpq_mem WHERE educind = 1	) A	JOIN hpq_fudforsch_mem B "
+						+ "ON A.memno = B.fudforsch_mem_refno AND A.id = B.hpq_hh_id) C	JOIN (	SELECT id"
+						+ "	FROM hpq_hh	WHERE prog_fudforsch = 1) D	ON C.id = D.id) E JOIN (SELECT hpq_hh_id"
+						+ "	FROM hpq_aquaequip	WHERE aquaequiptype_own != 1) F	ON E.id = F.hpq_hh_id) G"
+						+ "	JOIN ( SELECT id FROM hpq_mem WHERE ofw != 1 AND occup LIKE \"%fishing%\" OR "
+						+ "occup LIKE \"%fisherman%\" OR occup = \"%mangingisda%\"	) H  ON G.id = H.id	) I"
+						+ "    WHERE id not in (SELECT M2.id FROM hpq_mem M2 JOIN  hpq_cshforwrk_mem CW"
+						+ "	ON M2.id = CW.hpq_hh_id	AND M2.memno = CW.cshforwrk_mem_refno  ) GROUP BY id ) X"
+						+ " JOIN (SELECT id FROM hpq_mem WHERE educind = 1) Y ON X.id = Y.id"
+						+ "GROUP BY Y.id;", 
+						"Heuristic Optimization"),
+				new Query(
+						"SELECT MEM.id AS HouseHoldID, COUNT(MEM.id) AS NumStudyingTotal, X.NoOfFFSStudents "
+								+ "FROM (	SELECT M.id, COUNT(*) AS NoOfFFSStudents FROM hpq_mem M, "
+								+ "hpq_fudforsch_mem FS, hpq_hh H, hpq_aquaequip AE	WHERE H.id = M.id"
+								+ "	AND FS.hpq_hh_id = M.id	AND AE.hpq_hh_id = H.id	AND FS.fudforsch_mem_refno = M.memno"
+								+ "	AND M.educind = 1 AND H.prog_fudforsch = 1 AND AE.aquaequiptype_own != 1"
+								+ "	AND M.id in    		(   SELECT id"
+								+ "			FROM hpq_mem"
+								+ "			WHERE ofw != 1"
+								+ "			AND occup LIKE \"%fishing%\" OR occup LIKE \"%fisherman%\" OR occup ="
+								+ " \"%mangingisda%\"	)    AND M.id not in (SELECT M2.id	FROM hpq_mem M2, hpq_cshforwrk_mem CW "
+								+ "WHERE M2.id = CW.hpq_hh_id	AND M2.memno = CW.cshforwrk_mem_refno	)"
+								+ "	GROUP BY M.id) X, hpq_mem MEM WHERE MEM.educind = 1 AND X.id = MEM.id "
+								+ "GROUP BY MEM.id;", 
+						"Indexes",
+						createIndexes, dropIndexes),
+				new Query(
+						"SELECT MEM.id AS HouseHoldID, COUNT(MEM.id) AS NumStudyingTotal, N.NoOfFFSStudents "
+						+ "FROM numstudents N, hpq_mem MEM WHERE MEM.educind = 1 AND N.id = MEM.id "
+						+ "GROUP BY MEM.id;",
+						"Views",
+						createViews),
+				new Query(
+						"CALL getStudyingFFS();",
+						"Stored Procedures",procedures), };
+		//4-5 TABLES
 		
 		// set querysets
 		

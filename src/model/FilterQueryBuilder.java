@@ -18,9 +18,24 @@ public class FilterQueryBuilder extends Query{
     private String groupBy;
     private String having;
     private String orderBy;
+    private String runnerSP;
+    private boolean sp=false;
     
 
-    public void setSelect(String select) {
+    
+    public void setSpTrue(){
+    	sp=true;
+    }
+    
+    public String getRunnerSP() {
+		return runnerSP;
+	}
+
+	public void setRunnerSP(String runnerSP) {
+		this.runnerSP = runnerSP;
+	}
+
+	public void setSelect(String select) {
 		this.select = select;
 	}
 
@@ -94,17 +109,22 @@ public class FilterQueryBuilder extends Query{
     }
 
     public String getQuery(){
-    	String query ="";
-    	query += select.substring(0, select.length() - 1) +" "+ from.substring(0, from.length() - 1) + " ";
-    	if(where.length()>6)
-    		query +=where.substring(0, where.length() - 4)+" ";
-    	if(groupBy.length()!=0)
-    		query +=groupBy.substring(0, groupBy.length() - 2);
-    	if(having.length()!=0)
-    		query +=having;
-    	if(orderBy.length()!=0)
-    		query +=orderBy;
-    	return query;
+    	if(sp == false){
+	    	String query ="";
+	    	query += select.substring(0, select.length() - 1) +" "+ from.substring(0, from.length() - 1) + " ";
+	    	if(where.length()>6)
+	    		query +=where.substring(0, where.length() - 4)+" ";
+	    	if(groupBy.length()!=0)
+	    		query +=groupBy.substring(0, groupBy.length() - 2);
+	    	if(having.length()!=0)
+	    		query +=having;
+	    	if(orderBy.length()!=0)
+	    		query +=orderBy;
+	    	return query;
+    	}else{
+    		return runnerSP;
+    	}
+    	
     };
     
     public FilterQueryBuilder getCopy(){
